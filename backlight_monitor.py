@@ -181,13 +181,14 @@ if res!=args.frequency:
 
 verbose("on level=%d" % args.level_on)
 verbose("off level=%d" % args.level_off)
-verbose("fading %s" % (args.fade and (str(args.fade) + "s") or "is off"))
-verbose("backlight gpio#%d" % args.gpio)
-verbose("monitored gpio#%d%s" % (args.monitored_gpio, (args.invert and " (inverted)" or "")))
+verbose("PWM range 0-%d" % pi.get_PWM_range(args.gpio))
+verbose("fading %s" % (args.fade and ("time " + str(args.fade) + "s") or "is off"))
+verbose("backlight PWM gpio#%d" % args.gpio)
+verbose("monitored gpio#%d%s" % (args.monitored_gpio, (args.invert and " (active-low)" or " (active-high)")))
 verbose("backlight is %s" % get_backlight_state())
-verbose('PWM frequency to %d' % args.frequency)
-verbose("PWM range %d" % pi.get_PWM_real_range(args.gpio))
-verbose('Signal USR1/USR2 %s' % (args.disable_user_signals and "disabled" or "enabled"))
+verbose('backlight PWM frequency is %dHz' % args.frequency)
+verbose("real PWM range %d" % pi.get_PWM_real_range(args.gpio))
+verbose('signal USR1/USR2 %s' % (args.disable_user_signals and "disabled" or "enabled"))
 
 if args.info:
     verbose("exiting...")
