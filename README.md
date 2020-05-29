@@ -19,6 +19,7 @@ Then run `setup.sh`
 To activate the backlight overlay, disable display power management and enable the screen saver
 
 `xset -dpms`
+
 `xset s 10`
 
 The backlight should dim after 10 seconds and turn on if any activity is detected. Increase the value "10" as desired.
@@ -28,4 +29,5 @@ The backlight should dim after 10 seconds and turn on if any activity is detecte
 To enable or disable the backlight, you can send a signal to the daemon.
 
 `kill -USR1 $(pgrep -f backlight_monitor.py)` # turn display on
+
 `kill -USR2 $(pgrep -f backlight_monitor.py)` # turn display off
