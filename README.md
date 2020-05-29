@@ -21,7 +21,7 @@ To activate the backlight overlay, disable display power management and enable t
 `xset -dpms`
 `xset s 10`
 
-The backlight should dim after 10 seconds and turn on if any interaction is detected. Increase the value as desired.
+The backlight should dim after 10 seconds and turn on if any activity is detected. Increase the value "10" as desired.
 
 ## Manual control
 
