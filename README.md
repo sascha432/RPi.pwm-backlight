@@ -18,6 +18,16 @@ Then run `setup.sh`
 
 Stop the backlight-monitor service and execute `backlight_monitor.py 1023 0 -v` to see what's going on.
 
+## Using a button or sensor
+
+`--toggle-gpio` can be used with a button or proximity sensor that gives a short high pulse.
+
+For example:
+
+`--toggle-gpio=21`
+
+`# raspi-gpio set 21 op ; raspi-gpio set 21 dh; raspi-gpio set 21 dl ;raspi-gpio set 21 ip`
+
 ## gpio-backlight
 
 To activate the backlight overlay, disable display power management and enable the screen saver
