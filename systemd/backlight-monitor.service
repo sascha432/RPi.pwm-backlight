@@ -6,7 +6,7 @@ After=pigpiod.service
 [Service]
 Type=simple
 User=root
-ExecStart=/usr/local/bin/backlight_monitor.py
+ExecStart=/usr/local/bin/backlight_monitor.py 1023 0 --monitored-gpio=20 --gpio=18
 
 [Install]
 WantedBy=multi-user.target
