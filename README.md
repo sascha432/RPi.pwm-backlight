@@ -53,18 +53,19 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-  -P GPIO, --gpio GPIO  GPIO port
+  -P GPIO, --gpio GPIO  GPIO port (default: 18)
   -M MONITORED_GPIO, --monitored-gpio MONITORED_GPIO
-                        GPIO port to monitor
+                        GPIO port to monitor (default: 20)
   --invert, --active-low
-                        active low for monitored GPIO pin
-  -f FADE, --fade FADE  Fade delay in seconds
+                        active low for monitored GPIO pin (default: False)
+  -f FADE, --fade FADE  Fade delay in seconds (default: 5.0)
   -F FREQUENCY, --frequency FREQUENCY
-                        Backlight PWM frequency 100-1000 Hz
+                        Backlight PWM frequency 100-1000 Hz (default: 200)
   -DU, --disable-user-signals
-                        Signal USR1/USR2 turns backlight on/off
-  -v, --verbose         Verbose output
-  -i, --info            Display settings and exit
+                        Disable signal USR1/USR2 to turn backlight on and off
+                        (default: False)
+  -v, --verbose         Verbose output (default: False)
+  -i, --info            Display settings and exit (default: False)
 ```
 
 ## Display settings, status and exit
