@@ -1,0 +1,12 @@
+[Unit]
+Description=Backlight monitor service
+After=systemd-backlight@backlight:gpio-backlight.service
+After=pigpiod.service
+
+[Service]
+Type=simple
+User=root
+ExecStart=/usr/local/bin/backlight_monitor.py
+
+[Install]
+WantedBy=multi-user.target

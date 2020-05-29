@@ -1,0 +1,25 @@
+// Overlay for GPIO BACKLIGHT
+// Compile with :
+// dtc -@ -I dts -O dtb -o gpio-backlight-overlay.dtb gpio-backlight-overlay.dts
+
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2835", "brcm,bcm2836", "brcm,bcm2708", "brcm,bcm2709";
+
+  	//
+  	// backlight device in /sys/class/backlight/gpio-backlight
+  	//
+	fragment@0 {
+		target-path = "/";
+		__overlay__ {
+			gpio-backlight {
+				compatible = "gpio-backlight";
+				gpios = <&gpio 20 0>;
+				default-on;
+				fb = <&fb>;
+			};
+		};
+	};
+};
