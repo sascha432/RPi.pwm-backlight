@@ -8,20 +8,22 @@ import signal
 import threading
 
 class Defaults(object):
-	MAX_PWM = 1023
-	BACKLIGHT_GPIO = 18
-	MONITORED_GPIO = 20
-	FREQUENCY = 200
-	FREQUENCY_RANGE = (100, 1000)
-	FADE_TIME = 5.0
-	MAX_FADE_TIME = 60.0
+    MAX_PWM = 1023
+    BACKLIGHT_GPIO = 18
+    MONITORED_GPIO = 20
+    TOGGLE_GPIO = None
+    FREQUENCY = 200
+    FREQUENCY_RANGE = (100, 1000)
+    FADE_TIME = 5.0
+    MAX_FADE_TIME = 60.0
 ds = Defaults()
 
 parser = argparse.ArgumentParser(description='Backlight monitoring daemon', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('level_on', metavar='level_on', type=int, help='backlight level 0-%d' % ds.MAX_PWM)
 parser.add_argument('level_off', metavar='level_off', type=int, help='backlight level 0-%d' % ds.MAX_PWM)
-parser.add_argument('-P', '--gpio', default=ds.BACKLIGHT_GPIO, type=int, help="GPIO port")
-parser.add_argument('-M', '--monitored-gpio', default=ds.MONITORED_GPIO, type=int, help="GPIO port to monitor")
+parser.add_argument('-P', '--gpio', default=ds.BACKLIGHT_GPIO, type=int, help="GPIO pin")
+parser.add_argument('-M', '--monitored-gpio', default=ds.MONITORED_GPIO, type=int, help="GPIO pin to monitor")
+parser.add_argument('-T', '--toggle-gpio', default=ds.TOGGLE_GPIO, type=int, help="GPIO pin for a push button")
 parser.add_argument('--invert', '--active-low', action='store_true', default=False, help="active low for monitored GPIO pin")
 parser.add_argument('-f', '--fade', default=ds.FADE_TIME, type=float, help="Fade delay in seconds")
 parser.add_argument('-F', '--frequency', default=ds.FREQUENCY, type=int, help="Backlight PWM frequency %d-%d Hz" % ds.FREQUENCY_RANGE)
@@ -61,6 +63,12 @@ def get_monitored_gpio_state():
 # return "on" or "off"
 def get_backlight_state():
     return is_backlight_on(get_monitored_gpio_state()) and "on" or "off"
+
+def get_backlight_level(on_error = -1):
+    try:
+        return pi.get_PWM_dutycycle(args.gpio)
+    except:
+        return on_error
 
 class FadingThread(threading.Thread):
     def __init__(self, pigpio, backlight_gpio, fade_time, level):
@@ -104,11 +112,7 @@ class FadingThread(threading.Thread):
                 time.sleep(0.01)
             self.verbose("count %d" % c)
         self.target_level = level
-        try:
-            self.initial_level = self.pigpio.get_PWM_dutycycle(self.backlight_gpio)
-        except:
-            self.verbose("PWM not set, setting target level directly")
-            self.initial_level = self.target_level
+        self.initial_level = get_backlight_level(self.target_level)
         self.direction = (self.target_level > self.initial_level) and 1 or -1
         self.verbose("fade from %d to %d (%d)" % (self.initial_level, self.target_level, self.direction))
         self.wakeup()
@@ -150,7 +154,17 @@ def set_backlight(level):
 # callback for monitored gpio
 def mon_callback(gpio, level, tick):
     new_level = is_backlight_on(level) and args.level_on or args.level_off
-    verbose("gpio#%d level=%d, set backlight=%d" % (gpio, level, new_level))
+    verbose("monitored gpio#%d level=%d, set backlight=%d" % (gpio, level, new_level))
+    set_backlight(new_level)
+
+# callback for toggle button gpio
+def toggle_callback(gpio, level, tick):
+    cur_level = get_backlight_level()
+    if cur_level==args.level_on:
+        new_level = args.level_off
+    else:
+        new_level = args.level_on
+    verbose("toggle gpio#%d current level=%d, set backlight=%d" % (gpio, cur_level, new_level))
     set_backlight(new_level)
 
 # turn display on if script is terminated
@@ -185,6 +199,7 @@ verbose("PWM range 0-%d" % pi.get_PWM_range(args.gpio))
 verbose("fading %s" % (args.fade and ("time " + str(args.fade) + "s") or "is off"))
 verbose("backlight PWM gpio#%d" % args.gpio)
 verbose("monitored gpio#%d%s" % (args.monitored_gpio, (args.invert and " (active-low)" or " (active-high)")))
+verbose("toggle button %s" % (args.toggle_gpio and " gpio#" + str(args.toggle_gpio) or "disabled"))
 verbose("backlight is %s" % get_backlight_state())
 verbose('backlight PWM frequency is %dHz' % args.frequency)
 verbose("real PWM range %d" % pi.get_PWM_real_range(args.gpio))
@@ -202,7 +217,11 @@ if args.fade>0:
 mon_callback(args.monitored_gpio, pi.read(args.monitored_gpio), 0)
 
 verbose("monitoring gpio#%d" % args.monitored_gpio)
-cb = pi.callback(args.monitored_gpio, pigpio.EITHER_EDGE, mon_callback)
+pi.callback(args.monitored_gpio, pigpio.EITHER_EDGE, mon_callback)
+
+if args.toggle_gpio:
+    verbose("toggle button gpio#%d" % args.toggle_gpio)
+    pi.callback(args.toggle_gpio, pigpio.RISING_EDGE, toggle_callback)
 
 signal.signal(signal.SIGINT, term_signal_handler)
 signal.signal(signal.SIGTERM, term_signal_handler)
