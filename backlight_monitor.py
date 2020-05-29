@@ -17,7 +17,7 @@ class Defaults(object):
 	MAX_FADE_TIME = 60.0
 ds = Defaults()
 
-parser = argparse.ArgumentParser(description='Backlight monitoring daemon')
+parser = argparse.ArgumentParser(description='Backlight monitoring daemon', formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 parser.add_argument('level_on', metavar='level_on', type=int, help='backlight level 0-%d' % ds.MAX_PWM)
 parser.add_argument('level_off', metavar='level_off', type=int, help='backlight level 0-%d' % ds.MAX_PWM)
 parser.add_argument('-P', '--gpio', default=ds.BACKLIGHT_GPIO, type=int, help="GPIO port")
@@ -25,7 +25,7 @@ parser.add_argument('-M', '--monitored-gpio', default=ds.MONITORED_GPIO, type=in
 parser.add_argument('--invert', '--active-low', action='store_true', default=False, help="active low for monitored GPIO pin")
 parser.add_argument('-f', '--fade', default=ds.FADE_TIME, type=float, help="Fade delay in seconds")
 parser.add_argument('-F', '--frequency', default=ds.FREQUENCY, type=int, help="Backlight PWM frequency %d-%d Hz" % ds.FREQUENCY_RANGE)
-parser.add_argument('-DU', '--disable-user-signals', action='store_true', default=False, help="Signal USR1/USR2 turns backlight on/off")
+parser.add_argument('-DU', '--disable-user-signals', action='store_true', default=False, help="Disable signal USR1/USR2 to turn backlight on and off")
 parser.add_argument('-v', '--verbose', action='store_true', default=False, help="Verbose output")
 parser.add_argument('-i', '--info', action='store_true', default=False, help="Display settings and exit")
 args = parser.parse_args()
